@@ -2,7 +2,11 @@ import "server-only";
 
 import { list } from "@vercel/blob";
 
-export const CV_BLOB_PATH = "portfolio/cv/mohamed-lamsiah-cv.pdf";
+export const CV_BLOB_PREFIX = "portfolio/cv/mohamed-lamsiah-cv";
+
+export function createCvBlobPath() {
+  return `${CV_BLOB_PREFIX}-${Date.now()}.pdf`;
+}
 
 export type CvInfo = {
   url: string;
@@ -30,8 +34,13 @@ export async function getCurrentCv(): Promise<CvInfo> {
   }
 
   try {
-    const { blobs } = await list({ prefix: CV_BLOB_PATH, limit: 10 });
-    const currentBlob = blobs.find((blob) => blob.pathname === CV_BLOB_PATH);
+    const { blobs } = await list({ prefix: CV_BLOB_PREFIX, limit: 100 });
+    const currentBlob = blobs
+      .filter((blob) => blob.pathname.toLowerCase().endsWith(".pdf"))
+      .sort(
+        (left, right) =>
+          right.uploadedAt.getTime() - left.uploadedAt.getTime(),
+      )[0];
 
     if (currentBlob) {
       return {
@@ -43,7 +52,10 @@ export async function getCurrentCv(): Promise<CvInfo> {
         source: "blob",
       };
     }
-  } catch {
+  } catch (error) {
+    console.error("[cv-storage] unable to resolve the current CV", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     // The public portfolio must keep serving its bundled CV if Blob is unavailable.
   }
 

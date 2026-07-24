@@ -74,15 +74,18 @@ export function HeroSection() {
             <div className="visual-orbit orbit-one" aria-hidden="true" />
             <div className="visual-orbit orbit-two" aria-hidden="true" />
             <div className="portrait-card">
-              <span className="portrait-index">01 / PORTRAIT</span>
-              <Image
-                src="/mohamed-lamsiah.png"
-                width={1048}
-                height={1047}
-                sizes="(max-width: 900px) 88vw, 520px"
-                priority
-                alt="Mohamed Lamsiah, développeur Full-Stack Web et Mobile"
-              />
+              <div className="portrait-media">
+                <span className="portrait-index">01 / PORTRAIT</span>
+                <Image
+                  src="/mohamed-lamsiah-professional.jpeg"
+                  width={1254}
+                  height={1254}
+                  sizes="(max-width: 900px) 88vw, 520px"
+                  priority
+                  alt="Mohamed Lamsiah, développeur Full-Stack Web et Mobile"
+                />
+                <span className="portrait-sheen" aria-hidden="true" />
+              </div>
             </div>
             <div className="floating-card floating-card-top">
               <span className="status-dot" aria-hidden="true" />

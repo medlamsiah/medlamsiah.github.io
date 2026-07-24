@@ -2,12 +2,13 @@ import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import { getAdminSession, isSameOrigin } from "@/lib/admin-auth";
 import {
-  CV_BLOB_PATH,
+  createCvBlobPath,
   getCurrentCv,
   isBlobConfigured,
 } from "@/lib/cv-storage";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 const MAX_CV_SIZE = 8 * 1024 * 1024;
 
@@ -66,23 +67,51 @@ export async function POST(request: Request) {
     );
   }
 
-  const blob = await put(CV_BLOB_PATH, file, {
-    access: "public",
-    addRandomSuffix: false,
-    allowOverwrite: true,
-    contentType: "application/pdf",
-    cacheControlMaxAge: 60,
+  const pathname = createCvBlobPath();
+
+  console.info("[admin/cv] publishing a new CV version", {
+    pathname,
+    size: file.size,
   });
 
-  return NextResponse.json({
-    success: true,
-    cv: {
-      url: blob.url,
-      downloadUrl: blob.downloadUrl,
+  try {
+    const blob = await put(pathname, file, {
+      access: "public",
+      addRandomSuffix: false,
+      allowOverwrite: false,
+      contentType: "application/pdf",
+      cacheControlMaxAge: 31_536_000,
+    });
+
+    console.info("[admin/cv] CV version published", {
       pathname: blob.pathname,
       size: file.size,
-      uploadedAt: new Date().toISOString(),
-      source: "blob",
-    },
-  });
+    });
+
+    return NextResponse.json(
+      {
+        success: true,
+        cv: {
+          url: blob.url,
+          downloadUrl: blob.downloadUrl,
+          pathname: blob.pathname,
+          size: file.size,
+          uploadedAt: new Date().toISOString(),
+          source: "blob",
+        },
+      },
+      { headers: { "Cache-Control": "no-store, max-age=0" } },
+    );
+  } catch (error) {
+    console.error("[admin/cv] CV publication failed", {
+      pathname,
+      size: file.size,
+      error: error instanceof Error ? error.message : String(error),
+    });
+
+    return NextResponse.json(
+      { error: "La publication du CV a échoué. Réessayez dans un instant." },
+      { status: 500 },
+    );
+  }
 }
