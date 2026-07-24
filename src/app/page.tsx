@@ -13,7 +13,8 @@ export default function Home() {
     "@type": "Person",
     name: "Mohamed Lamsiah",
     url: "https://medlamsiah.vercel.app",
-    image: "https://medlamsiah.vercel.app/mohamed-lamsiah.png",
+    image:
+      "https://medlamsiah.vercel.app/mohamed-lamsiah-professional.jpeg",
     email: "mailto:mohamedlamsiah33@gmail.com",
     jobTitle: "Développeur Full-Stack Web & Mobile",
     sameAs: ["https://github.com/medlamsiah"],
